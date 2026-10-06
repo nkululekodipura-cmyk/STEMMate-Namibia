@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STEMMate Namibia — Accessible Prototype</title>
+<style>
+:root{--navy:#123b5d;--blue:#1d628f;--bg:#f4f7f9;--card:#fff;--text:#17212b;--muted:#5a6872;--ok:#1f6f4a;--warn:#8a5a00;--border:#c9d3da}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+header{background:var(--navy);color:#fff;padding:18px 22px;position:sticky;top:0;z-index:5}
+header .brand{font-size:22px;font-weight:700} header .sub{font-size:13px;opacity:.9}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+nav button{background:#fff;color:var(--navy);border:2px solid #fff;border-radius:8px;padding:9px 13px;font-weight:700}
+nav button:focus,button:focus,input:focus,textarea:focus,select:focus{outline:3px solid #f2c94c;outline-offset:2px}
+main{max-width:1050px;margin:auto;padding:22px}
+.status{background:#eaf4ee;border-left:5px solid var(--ok);padding:10px 13px;margin-bottom:18px}
+.offline{background:#fff4df;border-left-color:#c77d00}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 2px 8px #00000010}
+.card h3{margin-top:0;color:var(--navy)} .metric{font-size:30px;font-weight:700;color:var(--blue)}
+label{display:block;font-weight:700;margin-top:12px} input,select,textarea{width:100%;padding:11px;border:1px solid #9aaab5;border-radius:7px;background:#fff}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.primary{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:11px 15px;font-weight:700}
+.secondary{background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:8px;padding:10px 14px;font-weight:700}
+.danger{background:#fff1f1;color:#8b2020;border:1px solid #b34a4a;border-radius:8px;padding:10px 14px;font-weight:700}
+.hidden{display:none}.tag{display:inline-block;padding:4px 8px;border-radius:99px;background:#e7eef4;color:var(--navy);font-size:12px;font-weight:700}
+table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left} th{background:#edf2f5}
+.help{font-size:13px;color:var(--muted)} .toast{position:fixed;right:18px;bottom:18px;background:var(--navy);color:#fff;padding:14px 16px;border-radius:9px;max-width:360px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">STEMMate Namibia</div>
+  <div class="sub">Facilitator workspace • accessible, low-resource prototype • synthetic data only</div>
+  <nav aria-label="Primary navigation">
+    <button onclick="show('dashboard')">Dashboard</button>
+    <button onclick="show('create')">Create activity</button>
+    <button onclick="show('progress')">Learner progress</button>
+    <button onclick="toggleOffline()">Simulate offline</button>
+  </nav>
+</header>
+<main>
+<div id="status" class="status" role="status" aria-live="polite"><strong>Connected.</strong> Changes can sync when internet is available.</div>
+
+<section id="dashboard">
+<h1>Facilitator dashboard</h1>
+<p>Use the workspace to prepare STEM activities and review learner progress. The interface is designed for shared or low-specification devices.</p>
+<div class="grid">
+ <div class="card"><h3>Draft activities</h3><div class="metric">3</div><p class="help">Saved locally and ready for later sync.</p></div>
+ <div class="card"><h3>Active groups</h3><div class="metric">4</div><p class="help">Synthetic demonstration groups.</p></div>
+ <div class="card"><h3>Pending sync</h3><div class="metric" id="pending">0</div><p class="help">Items waiting for a connection.</p></div>
+</div>
+<div class="card" style="margin-top:16px">
+<h3>Quick actions</h3>
+<div class="actions">
+<button class="primary" onclick="show('create')">Create a STEM activity</button>
+<button class="secondary" onclick="show('progress')">Review learner progress</button>
+</div>
+</div>
+</section>
+
+<section id="create" class="hidden">
+<h1>Create STEM activity</h1>
+<div class="card">
+<p class="tag">Workflow 1</p>
+<p>Complete the fields below and save the activity. Required fields are validated before saving.</p>
+<form onsubmit="saveActivity(event)">
+<label for="title">Activity title <span aria-hidden="true">*</span></label>
+<input id="title" required aria-describedby="titleHelp" maxlength="80">
+<div id="titleHelp" class="help">Use a short, descriptive title.</div>
+<label for="topic">STEM topic <span aria-hidden="true">*</span></label>
+<select id="topic" required><option value="">Choose a topic</option><option>Water filtration</option><option>Electric circuits</option><option>Plant growth</option></select>
+<label for="instructions">Instructions <span aria-hidden="true">*</span></label>
+<textarea id="instructions" rows="5" required aria-describedby="instHelp"></textarea>
+<div id="instHelp" class="help">Keep instructions concise for shared-device use.</div>
+<div class="actions">
+<button class="primary" type="submit">Save activity</button>
+<button class="secondary" type="button" onclick="show('dashboard')">Cancel</button>
+</div>
+</form>
+</div>
+</section>
+
+<section id="progress" class="hidden">
+<h1>Learner progress</h1>
+<div class="card">
+<p class="tag">Workflow 2</p>
+<p>Review synthetic learner-group progress without requiring a live external connection.</p>
+<table>
+<thead><tr><th>Group</th><th>Activity</th><th>Status</th><th>Next action</th></tr></thead>
+<tbody>
+<tr><td>Group A</td><td>Water filtration</td><td><span class="tag">In progress</span></td><td><button class="secondary" onclick="review('Group A')">Review</button></td></tr>
+<tr><td>Group B</td><td>Electric circuits</td><td><span class="tag">Complete</span></td><td><button class="secondary" onclick="review('Group B')">Review</button></td></tr>
+<tr><td>Group C</td><td>Plant growth</td><td><span class="tag">Needs support</span></td><td><button class="secondary" onclick="review('Group C')">Review</button></td></tr>
+</tbody>
+</table>
+<div id="reviewBox" class="status hidden" style="margin-top:15px"></div>
+</div>
+</section>
+</main>
+<div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+<script>
+let offline=false, pending=0;
+function show(id){
+ ['dashboard','create','progress'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2800)}
+function toggleOffline(){
+ offline=!offline;
+ const s=document.getElementById('status'); s.classList.toggle('offline',offline);
+ s.innerHTML=offline ? '<strong>Offline mode.</strong> Changes are stored locally. Sync will be attempted when a connection returns.' : '<strong>Connected.</strong> Changes can sync when internet is available.';
+ toast(offline?'Offline mode enabled.':'Connection restored.');
+}
+function saveActivity(e){
+ e.preventDefault();
+ if(offline){pending++;document.getElementById('pending').textContent=pending;toast('Saved locally. Pending sync: '+pending);}
+ else toast('Activity saved and marked ready for learners.');
+ e.target.reset();show('dashboard');
+}
+function review(group){
+ const box=document.getElementById('reviewBox');box.classList.remove('hidden');
+ box.innerHTML='<strong>'+group+': review opened.</strong> Synthetic progress data loaded. Recommended action: check the activity instructions and provide targeted support.';
+}
+</script>
+</body>
+</html>
